@@ -8,6 +8,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"io/fs"
 	"os"
 	"path/filepath"
 	"strings"
@@ -89,6 +90,10 @@ func parseBuiltinModulesFile(r io.Reader) ([]string, error) {
 func listLoadedModules() ([]string, error) {
 	fModules, err := os.Open(loadedModulesFilepath)
 	if err != nil {
+		if errors.Is(err, fs.ErrNotExist) {
+			// The kernel doesn't have modules at all
+			return nil, nil
+		}
 		return nil, fmt.Errorf(
 			"failed to open loaded modules information at %s: %w",
 			loadedModulesFilepath, err)
